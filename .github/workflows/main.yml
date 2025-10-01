@@ -16,4 +16,6 @@ jobs:
 
       - name: Setup MSBuild
         uses: microsoft/setup-msbuild@v2
-  
+
+      - name: Build project
+        run: msbuild ./PhysicsGame.sln /p:Configuration=Release
