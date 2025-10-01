@@ -2,6 +2,8 @@ name: Build
 
 on:
   push:
+    tags:
+    - 'v*.*.*'
     branches:
     - main
   workflow_dispatch:
@@ -29,4 +31,36 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-artifact@v4.6.2
         with:
-          path: ./artifact/PhysicsGame
+          name: PhysicsGame-artifact
+          path: ./artifact/
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions: write-all
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Create release
+        uses: elgohr/Github-Release-Action@v5
+        env:
+          GH_TOKEN:  ${{ secrets.GITHUB_TOKEN }}
+        with:
+          title: Physics Game Release
+
+      - name: Download artifact
+        uses: actions/download-artifact@v5
+        with: 
+          name: PhysicsGame-artifact
+          path:  ./artifact/
+
+      - name: GitHub release  
+        uses: fnkr/github-action-ghr@v1.3
+        if: startsWith(github.ref, 'refs/tags/')
+        env:
+          GHR_COMPRESS: zip
+          GHR_PATH: ./artifact/
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      
